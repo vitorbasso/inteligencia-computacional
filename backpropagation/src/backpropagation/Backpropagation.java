@@ -18,7 +18,7 @@ public class Backpropagation {
      */
     public static void main(String[] args) {
         boolean repetir = true;
-        RedeNeural backpropagation = new RedeNeural(0.5);
+        RedeNeural backpropagation = new RedeNeural(0.5, 2, 1, 2, 1);
         Scanner scanner = new Scanner(System.in);
         
         backpropagation.treinar();
