@@ -46,9 +46,9 @@ public class NetworkTools {
 
         Integer[] values = new Integer[amount];
         for(int i = 0; i < amount; i++){
-            int n = (int)(Math.random() * (upperBound - lowerBound + 1) + lowerBound);
+            int n = (int)(Math.random() * (upperBound - lowerBound ));
             while(containsValue(values, n)){
-                n = (int)(Math.random() * (upperBound - lowerBound + 1) * lowerBound);
+                n = (int)(Math.random() * (upperBound - lowerBound ));
             }
             values[i] = n;
         }

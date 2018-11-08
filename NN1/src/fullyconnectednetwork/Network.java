@@ -1,5 +1,7 @@
 package fullyconnectednetwork;
 
+import trainset.TrainSet;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
@@ -67,6 +69,15 @@ public class Network {
         return output[this.NETWORK_SIZE-1];
     }
 
+    public void train(TrainSet set, int loops, int batch_size){
+        for(int i = 0; i < loops; i++){
+            TrainSet batch = set.extractBatch(batch_size);
+            for(int b = 0; b < batch_size; b++){
+                this.train(batch.getInput(b), batch.getOutput(b),0.3);
+            }
+        }
+    }
+
     public void train(double[] input, double[] target, double eta){
         if(input.length != INPUT_SIZE || target.length != OUTPUT_SIZE)
             return;
@@ -108,20 +119,21 @@ public class Network {
 
     public static void main(String args[]){
         Network net = new Network(4, 3, 3, 2);
-        double[] input = new double[]{0.1, 0.5, 0.2, 0.9};
-        double[] target = new double[]{0.9, 0.1};
 
-        double[] input2 = new double[]{0.6, 0.1, 0.4, 0.8};
-        double[] target2 = new double[]{0.9, 0.1};
+        TrainSet set = new TrainSet(4, 2);
 
-        for(int i = 0; i < 100000; i++){
-            net.train(input, target, 0.3);
-            net.train(input2, target2, 0.3);
+        set.addData(new double[]{0.1, 0.2, 0.3, 0.4}, new double[]{0.9, 0.1});
+        set.addData(new double[]{0.9, 0.8, 0.7, 0.6}, new double[]{0.1, 0.9});
+        set.addData(new double[]{0.3, 0.8, 0.1, 0.4}, new double[]{0.3, 0.7});
+        set.addData(new double[]{0.9, 0.8, 0.1, 0.2}, new double[]{0.7, 0.3});
+
+        net.train(set, 100000, 4);
+
+        for(int i = 0; i < 4; i++){
+            System.out.println(Arrays.toString(net.calculate(set.getInput(i))));
         }
 
-        double[] output = net.calculate(input);
-        System.out.println(Arrays.toString(output));
-        System.out.println(Arrays.toString((net.calculate(input2))));
+
 
     }
 }
