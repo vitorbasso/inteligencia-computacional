@@ -29,7 +29,6 @@ public class TrainSet {
             TrainSet set = new TrainSet(INPUT_SIZE, OUTPUT_SIZE);
             Integer[] ids = NetworkTools.randomValues(0,this.size() - 1, size);
             for(Integer i:ids) {
-                if( i < 0 || i >= size) System.out.println("Erro no i - i = " + i);;
                 set.addData(this.getInput(i),this.getOutput(i));
             }
             return set;

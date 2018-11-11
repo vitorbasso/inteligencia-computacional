@@ -1,11 +1,13 @@
 package fullyconnectednetwork;
 
+import sun.nio.ch.Net;
 import trainset.TrainSet;
 
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-public class Network {
+public class Network implements Serializable {
 
     private double[][] output;
     private double[][][] weights;
@@ -70,12 +72,40 @@ public class Network {
     }
 
     public void train(TrainSet set, int loops, int batch_size){
+        if(set.INPUT_SIZE != INPUT_SIZE || set.OUTPUT_SIZE != OUTPUT_SIZE) return;
         for(int i = 0; i < loops; i++){
             TrainSet batch = set.extractBatch(batch_size);
-            for(int b = 0; b < batch_size; b++){
+            for(int b = 0; b < batch.size(); b++){
                 this.train(batch.getInput(b), batch.getOutput(b),0.3);
             }
         }
+    }
+
+    public void train(TrainSet set, int loops){
+        if(set.INPUT_SIZE != INPUT_SIZE || set.OUTPUT_SIZE != OUTPUT_SIZE) return;
+        for(int i = 0; i < loops; i++){
+            for(int b = 0; b < set.size(); b++){
+                this.train(set.getInput(b), set.getOutput(b), 0.3);
+            }
+        }
+    }
+
+    public double MSE(double[] input, double[] target){
+        if(input.length != INPUT_SIZE || target.length != OUTPUT_SIZE) return 0;
+        calculate(input);
+        double v = 0;
+        for(int i = 0; i < target.length; i++){
+            v += (target[i] - output[NETWORK_SIZE - 1][i]) * (target[i] - output[NETWORK_SIZE - 1][i]);
+        }
+        return v / (2d * target.length);
+    }
+
+    public double MSE(TrainSet set){
+        double v = 0;
+        for(int i = 0; i < set.size(); i++){
+            v += MSE(set.getInput(i), set.getOutput(i));
+        }
+        return v / set.size();
     }
 
     public void train(double[] input, double[] target, double eta){
@@ -117,23 +147,22 @@ public class Network {
         return 1d/(1 + Math.exp(-x));
     }
 
-    public static void main(String args[]){
-        Network net = new Network(4, 3, 3, 2);
+    public static void main(String args[]){ }
 
-        TrainSet set = new TrainSet(4, 2);
-
-        set.addData(new double[]{0.1, 0.2, 0.3, 0.4}, new double[]{0.9, 0.1});
-        set.addData(new double[]{0.9, 0.8, 0.7, 0.6}, new double[]{0.1, 0.9});
-        set.addData(new double[]{0.3, 0.8, 0.1, 0.4}, new double[]{0.3, 0.7});
-        set.addData(new double[]{0.9, 0.8, 0.1, 0.2}, new double[]{0.7, 0.3});
-
-        net.train(set, 100000, 4);
-
-        for(int i = 0; i < 4; i++){
-            System.out.println(Arrays.toString(net.calculate(set.getInput(i))));
-        }
-
-
-
+    public void saveNetwork(String file) throws Exception{
+        File f = new File("res/" + file);
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
+        out.writeObject(this);
+        out.flush();
+        out.close();
     }
+
+    public static Network loadNetwork(String file) throws Exception{
+        File f = new File("res/" + file);
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
+        Network net = (Network) in.readObject();
+        in.close();
+        return net;
+    }
+
 }
